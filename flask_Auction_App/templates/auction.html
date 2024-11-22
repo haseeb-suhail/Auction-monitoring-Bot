@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Auction Items</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* Add basic styling for the table and form */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            word-wrap: break-word; /* Allows long words to break */
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .actions {
+            text-align: right;
+        }
+        .filter-container {
+            margin-bottom: 20px;
+        }
+        .table-container {
+            overflow-x: auto; /* Adds horizontal scrollbar if needed */
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            table {
+                font-size: 14px; /* Adjust font size for smaller screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Auction List</h1>
+
+    <div class="filter-container">
+        <form action="{{ url_for('add_auction') }}" method="POST">
+            <label for="url">Auction URL:</label>
+            <input type="text" name="url" required>
+            <label for="max_price">Max Price:</label>
+            <input type="number" name="max_price" required>
+            <button type="submit">Add Auction</button>
+        </form>
+
+        <!-- Filter to sort items by retail price -->
+        <form action="{{ url_for('index') }}" method="GET" style="display: inline;">
+            <label for="sort">Sort by Retail Price:</label>
+            <select name="sort" id="sort" onchange="this.form.submit()">
+                <option value="asc" {% if request.args.get('sort') == 'asc' %}selected{% endif %}>Ascending</option>
+                <option value="desc" {% if request.args.get('sort') == 'desc' %}selected{% endif %}>Descending</option>
+            </select>
+        </form>
+    </div>
+
+    <h2>Current Auctions:</h2>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Item Name</th>
+                    <th>Max Chase</th>
+                    <th class="actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in auction_items %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td>${{ item.max_price }}</td>
+                        <td class="actions">
+                            <form action="{{ url_for('chase', item_id=loop.index0) }}" method="POST" style="display: inline;">
+                                <button type="submit">Chase</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

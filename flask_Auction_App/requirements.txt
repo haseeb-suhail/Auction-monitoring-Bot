@@ -1,0 +1,2 @@
+telegram~=0.0.1
+selenium~=4.23.1

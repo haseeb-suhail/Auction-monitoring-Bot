@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Auctions</title>
+    <link rel="icon" type="image/x-icon" href="../static/assets/images/favicon2.png">
+
+    <!-- Google Fonts -->
+    <script>
+        WebFontConfig = {
+            google: {
+                families: ['Open+Sans:300,400,600,700,800', 'Poppins:300,400,500,600,700,800', 'Oswald:300,400,500,600,700,800']
+            }
+        };
+        (function (d) {
+            var wf = d.createElement('script'),
+                s = d.scripts[0];
+            wf.src = 'assets/js/webfont.js';
+            wf.async = true;
+            s.parentNode.insertBefore(wf, s);
+        })(document);
+    </script>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet">
+
+    <!-- Main CSS File -->
+    <link rel="stylesheet" href="../static/assets/css/demo4.min.css">
+    <link rel="stylesheet" type="text/css" href="../static/assets/vendor/fontawesome-free/css/all.min.css">
+
+    <style>
+        table {
+            font-family: Arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-wrapper">
+        <header class="header">
+            <div class="header-middle sticky-header" data-sticky-options="{'mobile': true}">
+                <div class="container">
+                    <div class="header-left col-lg-2 w-auto pl-0">
+                        <button class="mobile-menu-toggler text-primary mr-2" type="button">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <a href="index.html" class="logo">
+                            <img src="../static/assets/images/logo2.png" width="111" height="44" alt="Porto Logo">
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="header-bottom sticky-header d-none d-lg-block" data-sticky-options="{'mobile': false}">
+                <div class="container">
+                    <nav class="main-nav w-100">
+                        <ul class="menu">
+                            <li class="active">
+                                <a href="index.html">Home</a>
+                            </li>
+                            <li class="float-right">
+                                <div class="dropdown">
+                                    <button class="btn btn-primary dropdown-toggle" style="border-radius:15px;" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Action <i class="fa-solid fa-angle-down" style="font-size: 15px;"></i>
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        <a class="dropdown-item" href="#" id="deleteButton">Delete</a>
+                                    </div>
+                                </div>
+                            </li>
+                            <script>
+document.getElementById('deleteButton').addEventListener('click', function() {
+    let selectedItems = [];
+    document.querySelectorAll('input[name="item"]:checked').forEach(function(checkbox) {
+        const row = checkbox.closest('tr');  // Find the closest row of the table
+        const itemName = row.querySelector('td:nth-child(3)').innerText;  // Assuming the item name is in the 3rd column
+        selectedItems.push(itemName);  // Push the item name
+    });
+
+    if (selectedItems.length > 0) {
+        fetch('/remove_auction_by_name', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ item_names: selectedItems }),  // Send item names
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            location.reload();  // Reload the page to reflect changes
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    } else {
+        alert("Please select at least one item to delete.");
+    }
+});
+</script>
+
+
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <main class="main">
+            <div class="container">
+                <nav aria-label="breadcrumb" class="breadcrumb-nav">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="#">
+                                <i class="icon-home"></i>
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="#">Chase</a>
+                        </li>
+                    </ol>
+                </nav>
+
+                <div class="row">
+                    <div class="col-lg-12 mx-auto order-lg-1">
+                        <div class="row">
+                            <div class="col-md-12 mx-auto">
+                                <nav class="toolbox sticky-header" data-sticky-options="{'mobile': true}">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="toolbox-item toolbox-sort">
+                                                <form id="chaseForm" action="{{ url_for('start_chase') }}" method="POST">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <label for="chaseUrl">Auction URL:</label>
+                                                            <input type="text" id="chaseUrl" class="form-control" name="url" placeholder="Auction URL" required>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label for="chaseMaxChase">Max Chase Price:</label>
+                                                            <input type="text" id="chaseMaxChase" class="form-control" name="max_chase" placeholder="Max Chase Price" required>
+                                                        </div>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary mt-3">Start Chase</button>
+                                                </form>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </nav>
+                            </div>
+                        </div>
+                        <form method="get" action="/">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h2>Current Auction</h2>
+                                <div class="col-md-3">
+                                    <label>Sort By:</label>
+                                    <form method="get" action="/">
+                                    <div class="select-custom">
+                                        <select name="sort" class="form-control" onchange="this.form.submit()">
+                                            <option value="asc" {% if request.args.get('sort') == 'asc' %}selected{% endif %}>Sort by price: low to high</option>
+                                            <option value="desc" {% if request.args.get('sort') == 'desc' %}selected{% endif %}>Sort by price: high to low</option>
+                                        </select>
+                                    </div>
+                                </form>
+
+                                </div>
+                                <table>
+                                        <tr>
+                                            <th style="width: 2% !important;">Id</th>
+                                            <th style="width: 30% !important;">Item Image</th>
+                                            <th style="width: 30% !important;">Item Name</th>
+                                            <th style="width: 10% !important;">Retail Price</th>
+                                            <th style="width: 15% !important;">Max Chase</th>
+                                            <th style="width: 15% !important;">Edit Chase</th>
+                                        </tr>
+                                        {% for item in auction_items %}
+                                        <tr>
+                                            <td><input type="checkbox" id="item{{ loop.index }}" name="item" value="{{ item.id }}"></td>
+                                            <td><img src="{{ item.image }}" alt="Item Image" style="width: 100px;"></td>
+                                            <td>{{ item.name }}</td>
+                                            <td>{{ extract_retail_price(item.name) }}</td>
+                                            <td>
+                                                <!-- Static display of Max Chase -->
+                                                <span id="maxChaseText{{ loop.index }}">{{ item.max_chase }}</span>
+                                                <!-- Editable input, hidden initially -->
+                                                <input type="number" id="maxChaseInput{{ loop.index }}" name="maxChase" value="{{ item.max_chase }}" style="width: 100px; display: none;">
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-primary" style="border-radius:12px;" id="editButton{{ loop.index }}" onclick="editMaxChase('{{ loop.index }}')">
+                                                    <i class="fa-regular fa-pen-to-square"></i>
+                                                </button>
+                                                <!-- Save button, hidden initially -->
+                                                <button type="button" class="btn btn-success" style="border-radius:12px; display: none;" id="saveButton{{ loop.index }}" onclick="saveMaxChase('{{ item.id }}', '{{ loop.index }}')">
+                                                    Save
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </table>
+                                    <script>
+    // Function to show the editable input and hide the static text
+    function editMaxChase(index) {
+        document.getElementById('maxChaseText' + index).style.display = 'none';
+        document.getElementById('editButton' + index).style.display = 'none';
+        document.getElementById('maxChaseInput' + index).style.display = 'inline';
+        document.getElementById('saveButton' + index).style.display = 'inline';
+    }
+
+    // Function to save the updated max_chase value
+    function saveMaxChase(itemName, index) {
+        const maxChaseValue = document.getElementById('maxChaseInput' + index).value;
+
+        console.log('Saving Max Chase:', { item_names: [itemName], max_chase: maxChaseValue });
+
+        fetch('/update_max_chase', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'  // Ensure this token is correct or adjust as needed
+            },
+            body: JSON.stringify({
+                item_names: [itemName],
+                max_chase: maxChaseValue
+            })
+        }).then(response => response.json())
+          .then(data => {
+              if (response.ok) {
+                  document.getElementById('maxChaseText' + index).textContent = maxChaseValue;
+                  document.getElementById('maxChaseInput' + index).style.display = 'none';
+                  document.getElementById('saveButton' + index).style.display = 'none';
+                  document.getElementById('maxChaseText' + index).style.display = 'inline';
+                  document.getElementById('editButton' + index).style.display = 'inline';
+                  alert('Max Chase updated successfully!');
+              } else {
+                  alert('Failed to update Max Chase.');
+              }
+          }).catch(error => {
+              console.error('Error:', error);
+              alert('Error occurred while updating Max Chase.');
+          });
+    }
+</script>
+
+                                </div>
+                        </div>
+                       </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div class="mobile-menu-overlay"></div>
+        <div class="mobile-menu-container">
+            <div class="mobile-menu-wrapper">
+                <span class="mobile-menu-close"><i class="fa fa-times"></i></span>
+                <nav class="mobile-nav">
+                    <ul class="mobile-menu">
+                        <li><a href="index.html">Home</a></li>
+                        <li>
+                            <div class="dropdown">
+                                <button class="btn btn-primary dropdown-toggle" style="border-radius:15px;" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Action <i class="fa-solid fa-angle-down" style="font-size: 15px;"></i>
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" href="#" style="color:black !important">Delete</a>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+        <a id="scroll-top" href="#top" title="Top" role="button"><i class="icon-angle-up"></i></a>
+
+        <script data-cfasync="false" src="../../cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+        <script src="../static/assets/js/jquery.min.js"></script>
+        <script src="../static/assets/js/bootstrap.bundle.min.js"></script>
+        <script src="../static/assets/js/optional/isotope.pkgd.min.js"></script>
+        <script src="../static/assets/js/plugins.min.js"></script>
+        <script src="../static/assets/js/jquery.appear.min.js"></script>
+        <script src="../static/assets/js/main.min.js"></script>
+
+        <script>
+            document.getElementById('chaseButton').addEventListener('click', function () {
+                document.getElementById('chaseForm').submit();
+            });
+
+            document.getElementById('chaseButtonMobile').addEventListener('click', function () {
+                document.getElementById('chaseForm').submit();
+            });
+        </script>
+
+    </div>
+</body>
+
+</html>
